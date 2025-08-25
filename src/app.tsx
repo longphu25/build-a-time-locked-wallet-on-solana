@@ -7,12 +7,12 @@ const links = [
   //
   { label: 'Home', path: '/' },
   { label: 'Account', path: '/account' },
-  { label: 'Counter Program', path: '/counter' },
+  { label: 'Time-Locked Wallet', path: '/time-locked-wallet' },
 ]
 
 const LazyAccountIndex = lazy(() => import('@/components/account/account-index-feature'))
 const LazyAccountDetail = lazy(() => import('@/components/account/account-detail-feature'))
-const LazyCounter = lazy(() => import('@/components/counter/counter-feature'))
+const LazyTimeLockedWallet = lazy(() => import('@/components/time-locked-wallet/time-locked-wallet-feature'))
 const LazyDashboard = lazy(() => import('@/components/dashboard/dashboard-feature'))
 
 const routes: RouteObject[] = [
@@ -24,7 +24,7 @@ const routes: RouteObject[] = [
       { path: ':address', element: <LazyAccountDetail /> },
     ],
   },
-  { path: 'counter', element: <LazyCounter /> },
+  { path: 'time-locked-wallet', element: <LazyTimeLockedWallet /> },
 ]
 
 console.log({ links, routes })

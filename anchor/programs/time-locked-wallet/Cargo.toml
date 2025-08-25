@@ -1,12 +1,12 @@
 [package]
-name = "counter"
+name = "time-locked-wallet"
 version = "0.1.0"
-description = "Created with Anchor"
+description = "Time-locked wallet on Solana"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "counter"
+name = "time_locked_wallet"
 
 [features]
 default = []

@@ -6,13 +6,16 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-counter = "FqzkXZdwYjurnUKetJCAvaUw5WAqbwzU6gZEwydeEfqS"
+time-locked-wallet = "G9C4ivjLy46CfRH8wbxBLDX4eSunQaZopoiSK2E9LymC"
+
+[programs.devnet]
+time-locked-wallet = "G9C4ivjLy46CfRH8wbxBLDX4eSunQaZopoiSK2E9LymC"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
