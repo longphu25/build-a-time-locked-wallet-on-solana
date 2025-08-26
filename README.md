@@ -162,7 +162,6 @@ pub struct TimeLock {
     pub user: Pubkey,           // Original depositor
     pub amount: u64,            // Locked amount in lamports
     pub unlock_timestamp: i64,  // Unix timestamp for unlock
-    pub is_withdrawn: bool,     // Withdrawal status
 }
 ```
 
@@ -259,6 +258,28 @@ npm run type-check
 - Check browser console for detailed error logs
 - Review Solana transaction logs using [Solana Explorer](https://explorer.solana.com/)
 - Ensure wallet is set to Devnet network
+
+## New Features
+
+### Refresh Button and Auto-Refresh
+
+- **Manual Refresh**: A refresh button has been added to the UI, allowing users to manually update the list of time locks.
+
+- **Auto-Refresh**: The list of time locks now automatically refreshes every 5 seconds, ensuring real-time updates without user intervention.
+
+### Enhanced User Experience
+
+- **Real-Time Countdown Timer**: Displays the time remaining until unlock for each time lock.
+
+- **Improved Status Indicators**: Clear visual indicators for locked and unlocked states.
+
+### How to Use the Refresh Feature
+
+1. **Manual Refresh**: Click the "Refresh" button in the top-right corner of the time lock list.
+
+2. **Auto-Refresh**: The list updates automatically every 5 seconds.
+
+These features enhance the usability and responsiveness of the application, providing a seamless experience for managing time-locked wallets.
 
 ## Project Architecture
 

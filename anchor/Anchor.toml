@@ -1,21 +1,23 @@
 [toolchain]
-package_manager = "yarn"
+package_manager = "npm"
 
 [features]
 resolution = true
 skip-lint = false
 
-[programs.localnet]
-time-locked-wallet = "G9C4ivjLy46CfRH8wbxBLDX4eSunQaZopoiSK2E9LymC"
-
 [programs.devnet]
-time-locked-wallet = "G9C4ivjLy46CfRH8wbxBLDX4eSunQaZopoiSK2E9LymC"
+counter = "6UYsJcZm33W6yjX3ToCQrJQeDTkfc4dApgBzPFSDjjS2"
+time-locked-wallet = "AMEdHNwAUw2eBkm26Pwn2aePe6bQ7Vgzjeavx3uNvkGn"
+
+[programs.localnet]
+counter = "6UYsJcZm33W6yjX3ToCQrJQeDTkfc4dApgBzPFSDjjS2"
+time-locked-wallet = "AMEdHNwAUw2eBkm26Pwn2aePe6bQ7Vgzjeavx3uNvkGn"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

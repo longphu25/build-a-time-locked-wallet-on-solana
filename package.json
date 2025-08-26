@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "jest"
   },
   "description": "React + Vite, Tailwind, @solana/web3.js, Wallet Adapter, Anchor Counter program",
   "keywords": [
@@ -72,6 +73,7 @@
     "mocha": "^11.7.1",
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.1",
+    "ts-mocha": "^11.1.0",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.40.0",
