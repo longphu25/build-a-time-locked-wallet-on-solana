@@ -21,17 +21,37 @@ export function getTimeLockedWalletProgramId(cluster: Cluster) {
     case 'devnet':
     case 'testnet':
       // This is the program ID for the TimeLockedWallet program on devnet and testnet.
-      return new PublicKey('G9C4ivjLy46CfRH8wbxBLDX4eSunQaZopoiSK2E9LymC')
+      return new PublicKey('AMEdHNwAUw2eBkm26Pwn2aePe6bQ7Vgzjeavx3uNvkGn')
     case 'mainnet-beta':
     default:
       return TIME_LOCKED_WALLET_PROGRAM_ID
   }
 }
 
-// Helper function to derive the time lock PDA for a user
-export function getTimeLockPda(userPublicKey: PublicKey, programId: PublicKey = TIME_LOCKED_WALLET_PROGRAM_ID): [PublicKey, number] {
+// Helper function to derive the time lock PDA for a user with a specific amount
+export function getTimeLockPda(
+  userPublicKey: PublicKey,
+  amount: number,
+  programId: PublicKey = TIME_LOCKED_WALLET_PROGRAM_ID
+): [PublicKey, number] {
+  // Convert amount to little-endian bytes (8 bytes for u64)
+  const amountBuffer = Buffer.alloc(8);
+  amountBuffer.writeBigUInt64LE(BigInt(amount), 0);
+  
   return PublicKey.findProgramAddressSync(
-    [Buffer.from('time_lock'), userPublicKey.toBuffer()],
+    [Buffer.from('time_lock'), userPublicKey.toBuffer(), amountBuffer],
     programId
-  )
+  );
+}
+
+// Helper function to get all user's time locks
+export function getUserTimeLockPdas(
+  userPublicKey: PublicKey,
+  amounts: number[],
+  programId: PublicKey = TIME_LOCKED_WALLET_PROGRAM_ID
+): Array<{ amount: number; pda: PublicKey; bump: number }> {
+  return amounts.map(amount => {
+    const [pda, bump] = getTimeLockPda(userPublicKey, amount, programId);
+    return { amount, pda, bump };
+  });
 }

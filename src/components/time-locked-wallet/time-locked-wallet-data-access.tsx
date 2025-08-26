@@ -1,6 +1,6 @@
 import { getTimeLockedWalletProgram, getTimeLockedWalletProgramId, getTimeLockPda } from '@project/anchor'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { Cluster } from '@solana/web3.js'
+import { Cluster, PublicKey } from '@solana/web3.js'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useCluster } from '@/components/cluster/cluster-data-access'
@@ -31,6 +31,22 @@ export function useTimeLockedWalletProgram() {
     endpoint: cluster.endpoint
   })
 
+  // Get all time locks for the current user
+  const { publicKey } = useWallet()
+  const userTimeLocks = useQuery({
+    queryKey: ['time-locked-wallet', 'user-locks', { cluster, user: publicKey?.toString() }],
+    queryFn: async () => {
+      if (!publicKey) return []
+      
+      // Get all time lock accounts and filter by user
+      const allAccounts = await program.account.timeLock.all()
+      return allAccounts.filter(account => 
+        account.account.user.equals(publicKey)
+      )
+    },
+    enabled: !!publicKey,
+  })
+
   const accounts = useQuery({
     queryKey: ['time-locked-wallet', 'all', { cluster }],
     queryFn: () => program.account.timeLock.all(),
@@ -45,6 +61,7 @@ export function useTimeLockedWalletProgram() {
     program,
     programId,
     accounts,
+    userTimeLocks,
     getProgramAccount,
   }
 }
@@ -53,31 +70,14 @@ export function useTimeLockedWallet() {
   const { publicKey } = useWallet()
   const { cluster } = useCluster()
   const transactionToast = useTransactionToast()
-  const { program, accounts, programId } = useTimeLockedWalletProgram()
-
-  const timeLockPda = useMemo(() => {
-    if (!publicKey) return null
-    return getTimeLockPda(publicKey, programId)[0]
-  }, [publicKey, programId])
-
-  const timeLockQuery = useQuery({
-    queryKey: ['time-locked-wallet', 'fetch', { cluster, account: timeLockPda?.toString() }],
-    queryFn: async () => {
-      if (!timeLockPda) throw new Error('No time lock PDA')
-      try {
-        return await program.account.timeLock.fetch(timeLockPda)
-      } catch {
-        // Return null if account doesn't exist
-        return null
-      }
-    },
-    enabled: !!timeLockPda,
-  })
+  const { program, userTimeLocks, programId } = useTimeLockedWalletProgram()
 
   const initializeLock = useMutation({
     mutationKey: ['time-locked-wallet', 'initialize', { cluster }],
     mutationFn: async ({ amount, unlockTimestamp }: { amount: number; unlockTimestamp: number }) => {
-      if (!publicKey || !timeLockPda) throw new Error('Wallet not connected')
+      if (!publicKey) throw new Error('Wallet not connected')
+      
+      const [timeLockPda] = getTimeLockPda(publicKey, amount, programId)
       
       console.log('Initializing time lock with:', {
         amount: amount.toString(),
@@ -89,20 +89,20 @@ export function useTimeLockedWallet() {
       
       return program.methods
         .initializeLock(new anchor.BN(amount), new anchor.BN(unlockTimestamp))
-        .accounts({
+        .accountsPartial({
           user: publicKey,
+          timeLock: timeLockPda,
+          systemProgram: anchor.web3.SystemProgram.programId,
         })
         .rpc()
     },
     onSuccess: async (signature) => {
       console.log('Time lock initialized successfully:', signature)
       transactionToast(signature)
-      await accounts.refetch()
-      await timeLockQuery.refetch()
+      await userTimeLocks.refetch()
     },
     onError: (error) => {
       console.error('Failed to initialize time lock:', error)
-      // Extract more specific error message if available
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
       toast.error(`Failed to initialize time lock: ${errorMessage}`)
     },
@@ -110,27 +110,31 @@ export function useTimeLockedWallet() {
 
   const withdraw = useMutation({
     mutationKey: ['time-locked-wallet', 'withdraw', { cluster }],
-    mutationFn: async () => {
-      if (!publicKey || !timeLockPda) throw new Error('Wallet not connected')
+    mutationFn: async ({ amount, timeLockPda }: { amount: number; timeLockPda?: PublicKey }) => {
+      if (!publicKey) throw new Error('Wallet not connected')
+      
+      // Use provided PDA or generate from amount
+      const pda = timeLockPda || getTimeLockPda(publicKey, amount, programId)[0]
       
       console.log('Withdrawing from time lock:', {
+        amount: amount.toString(),
         user: publicKey.toString(),
-        timeLockPda: timeLockPda.toString(),
+        timeLockPda: pda.toString(),
         programId: programId.toString()
       })
       
       return program.methods
-        .withdraw()
-        .accounts({
+        .withdraw(new anchor.BN(amount))
+        .accountsPartial({
           user: publicKey,
+          timeLock: pda,
         })
         .rpc()
     },
     onSuccess: async (signature) => {
       console.log('Withdrawal successful:', signature)
       transactionToast(signature)
-      await accounts.refetch()
-      await timeLockQuery.refetch()
+      await userTimeLocks.refetch()
     },
     onError: (error) => {
       console.error('Failed to withdraw:', error)
@@ -140,10 +144,9 @@ export function useTimeLockedWallet() {
   })
 
   return {
-    timeLockQuery,
+    userTimeLocks,
     initializeLock,
     withdraw,
-    timeLockPda,
     isConnected: !!publicKey,
   }
 }
