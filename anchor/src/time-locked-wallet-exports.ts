@@ -21,7 +21,7 @@ export function getTimeLockedWalletProgramId(cluster: Cluster) {
     case 'devnet':
     case 'testnet':
       // This is the program ID for the TimeLockedWallet program on devnet and testnet.
-      return new PublicKey('AMEdHNwAUw2eBkm26Pwn2aePe6bQ7Vgzjeavx3uNvkGn')
+      return new PublicKey('bKiNMeXjK3RU1uTLgAWXCWErDQAfAUg6Z6kEM97mLms')
     case 'mainnet-beta':
     default:
       return TIME_LOCKED_WALLET_PROGRAM_ID
